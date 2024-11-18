@@ -12,7 +12,7 @@ tags:
   - "#annotation"
   - "#medium"
 ---
-## Spring Boot: One Article to Quickly Review All Commonly Used Annotations. Recommended for Collection!
+## All Commonly Used Annotations
 
 
 
@@ -21,34 +21,27 @@ tags:
 ## 1.Components-related Annotations
 
 ## @Controller
-
-Used to decorate components in the `controller` layer in MVC. The component scanning function in Spring Boot will recognize this annotation and instantiate an object for the decorated class. It is usually used in conjunction with `@RequestMapping`. When Spring MVC obtains a request, it will forward it to the method of the specified path for processing.
-
+Used to decorate components in the `controller` layer in MVC
 ```java
-@Controller
-@RequestMapping("/user/admin")
-class UserAdminController {}
+	@Controller
+	@RequestMapping("/user/admin")
+	class UserAdminController {}
 ```
-
 ## @Service
-
-Usually used to decorate components in the `service` layer. Declaring an object will instantiate the class object and inject it into the `bean` container.
-
+đánh dấu là service bean cho spring container quản lý.
 ```java
-@Servicepublic class UserService {        }
+@Servicepublic class UserService {
+	// business login
+}
 ```
-
 ## `@Repository`
-
-Used to decorate components in the `dao` layer. Components in the `dao` layer focus on the processing of system data, such as data in the database. They will also be scanned by components and generate instantiated objects.
-
+Used to decorate components in the `dao` layer. Components in the `dao` layer focus on the processing of system data.
 ```java
-@Repositorypublic interface RoleRepository extends JpaRepository<Role, Long> {    }
+@Repository
+public interface RoleRepository extends JpaRepository<Role, Long> {    }
 ```
-
 ## `@Component`
-
-Generally refers to components. When components are difficult to classify, this annotation can be used for marking. Its function is similar to `@Service`.
+Component chung mục đích để tạo ra các bean cho spring quản lý dùng cho DI.
 
 ```java
 @Componentpublic class DemoHandler {        }
@@ -57,13 +50,17 @@ Generally refers to components. When components are difficult to classify, this 
 ## 2\. Annotations related to Bean instances and life cycles
 
 ## `@Bean`
-
 Used to decorate methods, indicating that this method will create a Bean instance and be managed by the Spring container. The sample code is as follows:
 
 ```java
-@Configurationpublic class AppConfig {           @Bean    public Uploader initFileUploader() {        return new FileUploader();    }}
+@Configuration
+public class AppConfig {
+	@Bean
+	public Uploader initFileUploader() { 
+	       return new FileUploader(); 
+	 }
+}
 ```
-
 ## @Scope
 
 Used to declare the scope of a Spring `Bean` instance. The scopes are as follows:
@@ -72,17 +69,38 @@ Used to declare the scope of a Spring `Bean` instance. The scopes are as follows
 - **prototype**: Prototype pattern. The instance is recreated every time it is used.
 - **request**: The same instance is used in the same request. A new instance is created for different requests.
 - **session**: The same instance is used in the same session. A new instance is created for different sessions.
-
 ```java
-@Configurationpublic class RestTemplateConfig {        @Bean    @Scope("singleton")    public RestTemplate restTemplate(){        return new RestTemplate();    }}
+@Configuration
+public class RestTemplateConfig {
+  @Bean
+  @Scope("singleton")
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
+}
 ```
 
 ## @Primary
 
-When there are multiple instances of the same object, this instance is preferred.
+Khi có nhiều instance của bean. primary giúp đánh dấu cái nào ưu tiên hơn.
 
 ```java
-@Configuration@ComponentScanpublic class JavaConfig {            @Bean("b1")    @Primary    B b1() {        return new B();    }    @Bean("b2")    B b2() {        return new B();    }}
+@Configuration
+@ComponentScan
+public class JavaConfig {
+
+  @Bean("b1")
+  @Primary
+  B b1() {
+    return new B();
+  }
+
+  @Bean("b2")
+  B b2() {
+    return new B();
+  }
+}
+
 ```
 
 ## @PostConstruct
@@ -94,7 +112,30 @@ Used to decorate a method. It is executed after the object instance is created a
 Used to decorate a method. It is executed when the object instance is about to be removed by the Spring container. It can be used for releasing the resources held by the object instance.
 
 ```java
-public class Demo {    public Demo(){        System.out.println("constructor method...");    }    public void init(){        System.out.println("init...");    }    @PostConstruct    public void postConstruct(){        System.out.println("postConstruct...");    }    @PreDestroy    public void preDestroy(){        System.out.println("preDestroy...");    }    public void destroy(){        System.out.println("destroy...");    }}
+public class Demo {
+
+  public Demo() {
+    System.out.println("constructor method...");
+  }
+
+  public void init() {
+    System.out.println("init...");
+  }
+
+  @PostConstruct
+  public void postConstruct() {
+    System.out.println("postConstruct...");
+  }
+
+  @PreDestroy
+  public void preDestroy() {
+    System.out.println("preDestroy...");
+  }
+
+  public void destroy() {
+    System.out.println("destroy...");
+  }
+}
 ```
 
 Output:
@@ -110,7 +151,17 @@ constructor method...postConstruct...init...preDestroy...destroy...
 Automatically injects dependent objects according to the type of the object. By default, it requires the injected object instance to exist. You can configure `required=false` to inject an object that may not necessarily exist.
 
 ```java
-@Controller@RequestMapping("/user")public class UserController {        @Autowired    private UserService userService;        @Autowired(required=false)    private UserConfig userConfig;}
+@Controller
+@RequestMapping("/user")
+public class UserController {
+
+  @Autowired
+  private UserService userService;
+
+  @Autowired(required = false)
+  private UserConfig userConfig;
+}
+
 ```
 
 ## @Resource
@@ -118,15 +169,24 @@ Automatically injects dependent objects according to the type of the object. By 
 By default, it automatically injects dependent objects according to the `name` of the object. If you want to inject according to the type, you can set the property to `type = UmsAdminService.class`.
 
 ```java
-@Controller@RequestMapping("/user")public class UserController {    @Resource(name = "userServiceImpl")    private UserService userService;}
+@Controller
+@RequestMapping("/user")
+public class UserController {
+
+  @Resource(name = "userServiceImpl")
+  private UserService userService;
+}
 ```
 
 ## `@Qualifier`
 
 When there are multiple `beans` of the same type, using `@Autowired` to import will result in an error, indicating that the current object is not unique and Spring does not know which dependency to import. At this time, we can use `@Qualifier` for finer-grained control and select one of the candidates. It is generally used in conjunction with `@Autowired`. The example is as follows:
 
-```
-@Autowired@Qualifier("deptService")private DeptService deptService;
+```java
+@Autowired
+@Qualifier("deptService")
+private DeptService deptService;
+
 ```
 
 ## 4\. SpringMVC-related Annotations
@@ -146,7 +206,16 @@ Indicates that the return result of this method is directly written into the `HT
 For example, if the request parameter is in `json` format and the return parameter is also in `json` format, the sample code is as follows:
 
 ```java
-@Controller@RequestMapping("api")public class LoginController {        @RequestMapping(value = "login", method = RequestMethod.POST)    @ResponseBody    public ResponseEntity login(@RequestBody UserLoginDTO request){                return new ResponseEntity(HttpStatus.OK);    }}
+@Controller
+@RequestMapping("api")
+public class LoginController {
+
+  @RequestMapping(value = "login", method = RequestMethod.POST)
+  @ResponseBody
+  public ResponseEntity login(@RequestBody UserLoginDTO request) {
+    return new ResponseEntity(HttpStatus.OK);
+  }
+}
 ```
 
 ## `@RestController`
@@ -156,7 +225,16 @@ Like `@Controller`, it is used to annotate controller layer components. The diff
 That is, when `@RestController` is used on a class, it means that for all externally exposed interface methods in the current class, the format of the returned data is `application/json`. The sample code is as follows:
 
 ```java
-@RestController@RequestMapping("/api")public class LoginController {     @RequestMapping(value = "/login", method = RequestMethod.POST)    public ResponseEntity login(@RequestBody UserLoginDTO request){                return new ResponseEntity(HttpStatus.OK);    }}
+@RestController
+@RequestMapping("/api")
+public class LoginController {
+
+  @RequestMapping(value = "/login", method = RequestMethod.POST)
+  public ResponseEntity login(@RequestBody UserLoginDTO request) {
+    return new ResponseEntity(HttpStatus.OK);
+  }
+}
+
 ```
 
 ## `@RequestParam`
@@ -164,7 +242,14 @@ That is, when `@RestController` is used on a class, it means that for all extern
 Used to receive data where the request parameter is in form type. It is usually used in front of the parameters of a method. The sample code is as follows:
 
 ```java
-@RequestMapping(value = "login", method = RequestMethod.POST)@ResponseBodypublic ResponseEntity login(@RequestParam(value = "userName", required = true) String userName,@RequestParam(value = "userPwd",required = true) String userPwd){        return new ResponseEntity(HttpStatus.OK);}
+@RequestMapping(value = "login", method = RequestMethod.POST)
+@ResponseBodypublic
+ResponseEntity login(
+  @RequestParam(value = "userName", required = true) String userName,
+  @RequestParam(value = "userPwd", required = true) String userPwd
+) {
+  return new ResponseEntity(HttpStatus.OK);
+}
 ```
 
 ## `@PathVariable`
@@ -172,7 +257,12 @@ Used to receive data where the request parameter is in form type. It is usually 
 Used to obtain parameters in the request path. It is usually used on `restful` style APIs. The sample code is as follows:
 
 ```java
-@RequestMapping(value = "queryProduct/{id}", method = RequestMethod.POST)@ResponseBodypublic ResponseEntity queryProduct(@PathVariable("id") String id){        return new ResponseEntity(HttpStatus.OK);}
+@RequestMapping(value = "queryProduct/{id}", method = RequestMethod.POST)
+@ResponseBodypublic
+ResponseEntity queryProduct(@PathVariable("id") String id) {
+  return new ResponseEntity(HttpStatus.OK);
+}
+
 ```
 
 ## `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`
@@ -202,7 +292,13 @@ Indicates that a Java-based configuration class is declared. Spring Boot advocat
 In some scenarios, if we want to avoid the scanning of certain configuration classes (including avoiding configurations under some third-party jars), it can be handled in this way.
 
 ```java
-@Configuration@EnableAutoConfiguration(exclude = { org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class})public class AppConfig {    }
+@Configuration
+@EnableAutoConfiguration(
+  exclude = {org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+  }
+)
+public class AppConfig {}
+
 ```
 
 ## `@ComponentScan`
@@ -218,7 +314,14 @@ Annotates which classes under which paths need to be scanned by Spring. It is us
 It is equivalent to using the three annotations `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan`. It is usually used on the global startup class. The example is as follows:
 
 ```java
-@SpringBootApplicationpublic class PropertyApplication {    public static void main(String[] args) {        SpringApplication.run(PropertyApplication.class, args);    }}
+@SpringBootApplicationpublic
+class PropertyApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(PropertyApplication.class, args);
+  }
+}
+
 ```
 
 Replacing `@SpringBootApplication` with these three annotations `@Configuration`, `@EnableAutoConfiguration`, and `@ComponentScan` can also start successfully. `@SpringBootApplication` just simplifies these three annotations.
@@ -242,7 +345,15 @@ secure:  ignored:    urls: #Security path whitelist.      - /swagger-ui/      - 
 Then, by defining a `urls` property in the Java class, the properties in the configuration file can be imported.
 
 ```java
-@Getter@Setter@Configuration@ConfigurationProperties(prefix = "secure.ignored")public class IgnoreUrlsConfig {    private List<String> urls = new ArrayList<>();}
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "secure.ignored")
+public class IgnoreUrlsConfig {
+
+  private List<String> urls = new ArrayList<>();
+}
+
 ```
 
 ## `@Conditional`
@@ -259,7 +370,50 @@ Starting from Spring 4, the `@Conditional` annotation can be used to load `bean`
 The specific application case is as follows:
 
 ```java
-@Configurationpublic class ConditionalConfig {        @ConditionalOnBean(Test.class)    @Bean    public A createA(){        return new A();    }        @ConditionalOnMissingBean(Test.class)    @Bean    public B createB(){        return new B();    }        @ConditionalOnClass(Test.class)    @Bean    public C createC(){        return new C();    }        @ConditionalOnMissingClass(Test.class)    @Bean    public D createD(){        return new D();    }        @ConditionalOnExpression("${enableConfig:false}")    @Bean    public E createE(){        return new E();    }        @ConditionalOnProperty(prefix = "filter",name = "loginFilter", havingValue = "true")    @Bean    public F createF(){        return new F();    }}
+@Configurationpublic
+class ConditionalConfig {
+
+  @ConditionalOnBean(Test.class)
+  @Bean
+  public A createA() {
+    return new A();
+  }
+
+  @ConditionalOnMissingBean(Test.class)
+  @Bean
+  public B createB() {
+    return new B();
+  }
+
+  @ConditionalOnClass(Test.class)
+  @Bean
+  public C createC() {
+    return new C();
+  }
+
+  @ConditionalOnMissingClass(Test.class)
+  @Bean
+  public D createD() {
+    return new D();
+  }
+
+  @ConditionalOnExpression("${enableConfig:false}")
+  @Bean
+  public E createE() {
+    return new E();
+  }
+
+  @ConditionalOnProperty(
+    prefix = "filter",
+    name = "loginFilter",
+    havingValue = "true"
+  )
+  @Bean
+  public F createF() {
+    return new F();
+  }
+}
+
 ```
 
 ## `@value`
@@ -272,8 +426,19 @@ config.name=Dylan
 
 Inside any `bean` container, you can inject parameters through the `@Value` annotation and obtain the value of the parameter variable.
 
-```
-@RestControllerpublic class HelloController {    @Value("${config.name}")    private String configName;    @GetMapping("config")    public String config(){        return JSON.toJSONString(configName);    }}
+```java
+@RestControllerpublic
+class HelloController {
+
+  @Value("${config.name}")
+  private String configName;
+
+  @GetMapping("config")
+  public String config() {
+    return JSON.toJSONString(configName);
+  }
+}
+
 ```
 
 ## `@ConfigurationProperties`
@@ -290,8 +455,14 @@ config.name=demo_1config.value=demo_value_1
 
 Then, create a Java configuration class and inject the parameter variables.
 
-```
-@Component@ConfigurationProperties(prefix = "config")public class Config {    public String name;    public String value;    }
+```java
+@Component
+@ConfigurationProperties(prefix = "config")
+public class Config {
+
+  public String name;
+  public String value;
+}
 ```
 
 Finally, where it is needed, inject the `Config` object through `ioc`.
@@ -300,16 +471,30 @@ Finally, where it is needed, inject the `Config` object through `ioc`.
 
 This annotation is used to read our custom configuration files. For example, to import two configuration files, `test.properties` and `bussiness.properties`, the usage is as follows:
 
-```
-@SpringBootApplication@PropertySource(value = {"test.properties","bussiness.properties"})public class PropertyApplication {    public static void main(String[] args) {        SpringApplication.run(PropertyApplication.class, args);    }}
+```java
+@SpringBootApplication
+@PropertySource(value = { "test.properties", "bussiness.properties" })
+public class PropertyApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(PropertyApplication.class, args);
+  }
+}
 ```
 
 ## `@ImportResource`
 
 Used to load xml configuration files. For example, to import a custom `aaa.xml` file, the usage is as follows:
 
-```
-@ImportResource(locations = "classpath:aaa.xml")@SpringBootApplicationpublic class PropertyApplication {    public static void main(String[] args) {        SpringApplication.run(PropertyApplication.class, args);    }}
+```java
+@ImportResource(locations = "classpath:aaa.xml")
+@SpringBootApplicationpublic
+class PropertyApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(PropertyApplication.class, args);
+  }
+}
 ```
 
 ## 6\. JPA-related Annotations
@@ -339,8 +524,28 @@ Indicates the generation strategy of the primary key. There are four options as 
 
 Used to define a sequence for generating primary keys. It needs to be used in conjunction with `@GeneratedValue` to be effective. Taking the `TB_ROLE` table as an example, the corresponding annotation configuration is as follows:
 
-```
-@Entity@Table(name = "TB_ROLE")@SequenceGenerator(name = "id_seq", sequenceName = "seq_repair",allocationSize = 1)public class Role implements Serializable {    private static final long serialVersionUID = 1L;    @Id    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")    private Long id;    @Column(nullable = false)    private String roleName;    @Column(nullable = false)    private String roleType;}
+```java
+@Entity
+@Table(name = "TB_ROLE")
+@SequenceGenerator(
+  name = "id_seq",
+  sequenceName = "seq_repair",
+  allocationSize = 1
+)
+public class Role implements Serializable {
+
+  private static final long serialVersionUID = 1L;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_seq")
+  private Long id;
+
+  @Column(nullable = false)
+  private String roleName;
+
+  @Column(nullable = false)
+  private String roleType;
+}
 ```
 
 ## `@Transient`
@@ -381,8 +586,36 @@ These three annotations are equivalent to the `one-to-one`, `one-to-many`, and `
 
 They are usually used in combination to handle global exceptions. The sample code is as follows:
 
-```
-@Slf4j@Configuration@ControllerAdvicepublic class GlobalExceptionConfig {        private static final Integer GLOBAL_ERROR_CODE = 500;        @ExceptionHandler(value = Exception.class)    @ResponseBody    public void exceptionHandler(HttpServletRequest request, HttpServletResponse response, Exception e) throws Exception {        log.error("Uniform exception handler: ", e);        ResultMsg<Object> resultMsg = new ResultMsg<>();        resultMsg.setCode(GLOBAL_ERROR_CODE);        if (e instanceof CommonException) {            CommonException ex = (CommonException) e;            if(ex.getErrCode() != 0) {                resultMsg.setCode(ex.getErrCode());            }            resultMsg.setMsg(ex.getErrMsg());        } else {            resultMsg.setMsg(CommonErrorMsg.SYSTEM_ERROR.getMessage());        }        WebUtil.buildPrintWriter(response, resultMsg);    }}
+```java
+@Slf4j
+@Configuration
+@ControllerAdvicepublic
+class GlobalExceptionConfig {
+
+  private static final Integer GLOBAL_ERROR_CODE = 500;
+
+  @ExceptionHandler(value = Exception.class)
+  @ResponseBody
+  public void exceptionHandler(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    Exception e
+  ) throws Exception {
+    log.error("Uniform exception handler: ", e);
+    ResultMsg<Object> resultMsg = new ResultMsg<>();
+    resultMsg.setCode(GLOBAL_ERROR_CODE);
+    if (e instanceof CommonException) {
+      CommonException ex = (CommonException) e;
+      if (ex.getErrCode() != 0) {
+        resultMsg.setCode(ex.getErrCode());
+      }
+      resultMsg.setMsg(ex.getErrMsg());
+    } else {
+      resultMsg.setMsg(CommonErrorMsg.SYSTEM_ERROR.getMessage());
+    }
+    WebUtil.buildPrintWriter(response, resultMsg);
+  }
+}
 ```
 
 ## 8.AOP-related Annotations
@@ -421,8 +654,34 @@ Used to define the execution order of components. In AOP, it refers to the execu
 
 ***Example***:
 
-```
-@Aspect@Component@Order(1)public class WebLogAspect {    private static final Logger LOGGER = LoggerFactory.getLogger(WebLogAspect.class);    @Pointcut("execution(public * com.dylan.smith.web.controller.*.*(..))")    public void webLog() {    }    @Before("webLog()")    public void doBefore(JoinPoint joinPoint) throws Throwable {    }    @AfterReturning(value = "webLog()", returning = "ret")    public void doAfterReturning(Object ret) throws Throwable {    }    @Around("webLog()")    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {        WebLog webLog = new WebLog();                Object result = joinPoint.proceed();        LOGGER.info("{}", JSONUtil.parse(webLog));        return result;    }    }
+```java
+@Aspect
+@Component
+@Order(1)
+public class WebLogAspect {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(
+    WebLogAspect.class
+  );
+
+  @Pointcut("execution(public * com.dylan.smith.web.controller.*.*(..))")
+  public void webLog() {}
+
+  @Before("webLog()")
+  public void doBefore(JoinPoint joinPoint) throws Throwable {}
+
+  @AfterReturning(value = "webLog()", returning = "ret")
+  public void doAfterReturning(Object ret) throws Throwable {}
+
+  @Around("webLog()")
+  public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
+    WebLog webLog = new WebLog();
+    Object result = joinPoint.proceed();
+    LOGGER.info("{}", JSONUtil.parse(webLog));
+    return result;
+  }
+}
+
 ```
 
 ## 9.Testing-related Annotations
@@ -439,20 +698,15 @@ Generally applied to test classes, it is used to declare the active Spring confi
 
 Generally applied to test classes, they are used for unit testing. The example is as follows:
 
+```java 
+@ActiveProfiles("dev")
+@RunWith(SpringRunner.class)
+@SpringBootTestpublic
+class TestJunit {
+
+  @Test
+  public void executeTask() {}
+}
+
 ```
-@ActiveProfiles("dev")@RunWith(SpringRunner.class)@SpringBootTestpublic class TestJunit {    @Test    public void executeTask() {            }}
-```
 
-Okay, that’s all for this time, see you next time! 🤭
-
-**Finally, if the article was helpful, please clap 👏and follow, thank you! ╰(\*°▽°\*)╯**
-
-**I’m Dylan, looking forward to progressing with you. ❤️**
-
-Recommend reading…
-
-![Dylan Smith](https://miro.medium.com/v2/resize:fill:40:40/1*4oAGfnElULhbcKXWArnexA@2x.jpeg)
-
-![Dylan Smith](https://miro.medium.com/v2/resize:fill:40:40/1*4oAGfnElULhbcKXWArnexA@2x.jpeg)
-
-## Mastering Redis And Cache
