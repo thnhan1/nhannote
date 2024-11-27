@@ -23,6 +23,8 @@ if [ -t 1 ]; then
     exec zsh
 fi
 ```
+alternative method: config terminal profile
+![[gitbash-to-zsh-config.png]]
 ### 4. Fix Displaying of Unexpected Characters
 
 Fix the displaying of garbled characters on terminal by appending this line in  
