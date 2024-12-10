@@ -12,3 +12,13 @@ java/
 /.*.png
 /.*.jpeg
 /typescript
+*.py
+*.exe
+*.sh
+*.go
+*.png
+*.jpeg
+*.jpg
+/duan1
+
+
